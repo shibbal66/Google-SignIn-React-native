@@ -1,28 +1,38 @@
 import React, { useEffect } from "react";
 import { StyleSheet, View, Button } from "react-native";
-import * as GoogleSignIn from "expo-google-sign-in";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+
+GoogleSignin.configure({
+  webClientId:
+    "379794665637-i327atg6nqmisc1g8lc1kcerfa0baola.apps.googleusercontent.com",
+});
 
 export default function App() {
-  // Initialize Google Sign-In when the component mounts
   useEffect(() => {
-    GoogleSignIn.initAsync({
-      iosClientId:
-        "379794665637-4hr31jd2tqe86oesias63049ke7nh68a.apps.googleusercontent.com",
-      androidClientId:
-        "379794665637-4hhv9prtkclq69usmmttdcjbjl4i4jvd.apps.googleusercontent.com",
+    GoogleSignin.configure({
+      webClientId:
+        "379794665637-i327atg6nqmisc1g8lc1kcerfa0baola.apps.googleusercontent.com",
     });
   }, []);
 
   const signInAsync = async () => {
     try {
-      await GoogleSignIn.askForPlayServicesAsync();
-      const { type, user } = await GoogleSignIn.signInAsync();
-      if (type === "success") {
-        // Successfully signed in
-        console.log(user);
-      }
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo);
     } catch (error) {
-      console.error("Google Sign-In error:", error);
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log("User cancelled the login flow");
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log("Sign in is in progress already");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log("Play services not available or outdated");
+      } else {
+        console.log("Something went wrong:", error);
+      }
     }
   };
 
